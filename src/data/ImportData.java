@@ -51,7 +51,7 @@ public class ImportData {
 		//db.setSQLDriver(new PostgreSQLDriver());
 		//db.setSQLDriver(new SQLServerDriver());
 		db.setPort(3306);
-		db.setNodeQuery("SELECT employeelist.Email_id  AS id, employeelist.eid as label FROM employeelist");
+		db.setNodeQuery("SELECT employeeinfo.email  AS id, employeeinfo.eid as label FROM employeeinfo where profilerank>0");
 		db.setEdgeQuery("SELECT sender_recipient.sender AS source, sender_recipient.rvalue AS target FROM sender_recipient");
 		ImporterEdgeList edgeListImporter = new ImporterEdgeList();
 		Container container = importController.importDatabase(db, edgeListImporter);
@@ -61,42 +61,33 @@ public class ImportData {
 		//Append imported data to GraphAPI
 		importController.process(container, new DefaultProcessor(), workspace);
 
-		System.out.println("asd2");
 		//See if graph is well imported
-//		UndirectedGraph graph = graphModel.getUndirectedGraph();
 		DirectedGraph graph = graphModel.getDirectedGraph();
 		
-		System.out.println(graph.getNode(15));
-		Node node = graph.getNode(16);
-		Node node2 = graph.getNode(130);
 		System.out.println("Nodes: " + graph.getNodeCount());
 		System.out.println("Edges: " + graph.getEdgeCount());
-		System.out.println("asd3");
 
 		PageRank pagerank = new PageRank();
 		pagerank.setProbability(0.85);
+		pagerank.setEpsilon(0.001);
 		pagerank.setDirected(true);
 		pagerank.execute(graphModel, attributeModel);
 		AttributeColumn col = attributeModel.getNodeTable().getColumn(PageRank.PAGERANK);
 
-		   Double centrality = (Double)node.getNodeData().getAttributes().getValue(col.getIndex());
-		   System.out.println("pagerank 15: "+node.getId()+" "+node.getNodeData()+" "+centrality);
-		   Double centrality2 = (Double)node2.getNodeData().getAttributes().getValue(col.getIndex());
-		   System.out.println("pagerank 130: "+node2.getId()+" "+node2.getNodeData()+" "+centrality2);
 		//Iterate over values
-		   Double max = 0.0;
-		for (Node n : graph.getNodes()) {
-		   
-			Double centrality5 = (Double)n.getNodeData().getAttributes().getValue(col.getIndex());
-		   
-			System.out.println(centrality5);
-			if(max < centrality5){
-				max = centrality5;
-			}
-		}
-		
-		System.out.println("max: "+max);
-		
+//		   Double max = 0.0;
+//		for (Node n : graph.getNodes()) {
+//		   
+//			Double centrality5 = (Double)n.getNodeData().getAttributes().getValue(col.getIndex());
+//		   
+////			System.out.println(centrality5);
+//			if(max < centrality5){
+//				max = centrality5;
+//			}
+//		}
+//		
+//		System.out.println("max: "+max);
+//		
 //		//Layout - 100 Yifan Hu passes
 //		YifanHuLayout layout = new YifanHuLayout(null, new StepDisplacement(1f));
 //		layout.setGraphModel(graphModel);
@@ -131,12 +122,13 @@ public class ImportData {
 
 //		//Update
 //		int count = 0;
-//		for (Node node : graph.getNodes().toArray()) {
-//		    String id = node.getNodeData().getId();
-//		    float x = node.getNodeData().x();
-//		    float y = node.getNodeData().y();
+//		for (Node nodes : graph.getNodes().toArray()) {
+//		    String id = nodes.getNodeData().getId();
+////		    float y = nodes.getNodeData().y();
+//			Double pgrank = (Double)nodes.getNodeData().getAttributes().getValue(col.getIndex());
 //
-//		    String query = "UPDATE " + db.getDBName() + ".nodes SET x = '" + x + "', y = '" + y + "' WHERE nodes.id='" + id+"'";
+//		    String query = "UPDATE " + db.getDBName() + ".employeeinfo "
+//		    		+ "SET pagerank = "+pgrank+" WHERE employeeinfo.email='" + id + "'";
 //		    try {
 //		        Statement s = connection.createStatement();
 //		        count += s.executeUpdate(query);
