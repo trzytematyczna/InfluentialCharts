@@ -3,7 +3,7 @@ declare
       counter integer;
 BEGIN
 counter = 0;
-while counter < 10000 loop
+while counter < 100 loop
 	perform divide_category();
 	counter=counter+1;
 	end loop;
