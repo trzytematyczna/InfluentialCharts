@@ -1,5 +1,6 @@
 package jchart;
 
+import java.awt.Color;
 import java.io.*; 
 import java.sql.*; 
 import java.util.LinkedList;
@@ -22,6 +23,7 @@ import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.chart.renderer.category.LineAndShapeRenderer;
 import org.jfree.data.category.CategoryDataset; 
 import org.jfree.data.category.DefaultCategoryDataset; 
@@ -39,6 +41,16 @@ public class ProfileRankCharts
 //		  "Top 10 users ProfileRank - all data", 
 		  "User ID", 
 		  "Profile Rank Score");
+//	  barchart.setBackgroundPaint(Color.WHITE);
+//	  final CategoryPlot plot = barchart.getCategoryPlot();
+//      plot.setBackgroundPaint(Color.lightGray);
+//      plot.setDomainGridlinePaint(Color.black);
+//      plot.setRangeGridlinePaint(Color.black);
+//      final BarRenderer renderer = (BarRenderer) plot.getRenderer();
+//      renderer.setDrawBarOutline(false);
+//      renderer.setMinimumBarLength(0.01);
+////      BarRenderer renderer = (BarRenderer) chart.getCategoryPlot().getRenderer();
+//      renderer.setItemMargin(.00001);
 	  JFreeChart xychart = XYChart(
 			  "yt", 
 			  "User ID", 
@@ -63,13 +75,22 @@ public class ProfileRankCharts
 //	  DateAxis axis = (DateAxis) plot.getDomainAxis();
 	  
       int width = 700; /* Width of the image */
-      int height = 370; /* Height of the image */ 
+      int height = 400; /* Height of the image */ 
 //      saveToFile("ProfileRank_Top10_All.jpg", barchart, width, height);
 //      saveToFile("ProfileRank_Zero_Parameters.jpg", barchart, width, height);
 
 //      charts();
       
-      one_chart();
+//      one_chart();
+      
+      for(int i=1; i<=10;i++){
+    	  JFreeChart chart = ChartFactory.createBarChart("Top 10 users ProfileRank Generation "+i,
+//    			  "Top 10 users ProfileRank - all data", 
+    			  "User ID", 
+    			  "Profile Rank Score", getDatasetTop10Generation(i),
+	    		  PlotOrientation.VERTICAL, true, true, false);  
+    	  saveToFile("ProfileRankTop10_Generation"+i+".jpg", chart, width, height);
+      }
    }
    
    
@@ -264,6 +285,32 @@ public static JFreeChart XYChart(String title, String category, String score) th
 	      return dataset;
    
    }
+   
+   public static DefaultCategoryDataset getDatasetTop10Generation(int generation) throws SQLException, ClassNotFoundException{
+	      /* Create MySQL Database Connection */
+	      Class.forName( "com.mysql.jdbc.Driver" );
+	      Connection connect = DriverManager.getConnection(
+	      "jdbc:mysql://localhost:3306/test" ,     
+	      "root",     
+	      "gozofewi");
+	      
+	      Statement statement = connect.createStatement( );
+//	      ResultSet resultSet = statement.executeQuery("select eid, email, profilerank from EmployeeInfo order by profilerank desc limit 10" );
+	      ResultSet resultSet = statement.executeQuery("SELECT eid, profilerank FROM test.profilerank where generation ="+generation+" order by profilerank desc limit 10" );
+	      
+	      DefaultCategoryDataset dataset = new DefaultCategoryDataset( );
+	      while( resultSet.next( ) ) 
+	      {
+	          dataset.setValue(
+	        		  Double.parseDouble( resultSet.getString( "profilerank" )),
+	        		  resultSet.getString( "profilerank" ),
+	        		  resultSet.getString( "eid" )
+	         );
+	      }
+	      
+	      return dataset;
+
+}
    
    
 	public static void saveToFile(String filename, JFreeChart chart, int width, int height) throws IOException{
