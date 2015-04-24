@@ -34,7 +34,7 @@ rest = varlinkcontent;
 while counter < content_len loop
 	select split_part(rest, ';', 1) into linkcurrent;
 	select substring(linkcurrent from '.*://([^/]*)') into linkdomainfull;
-	if linkdomain is null then
+	if linkdomainfull is null then
 		select substring(linkcurrent from '(www.[^/]*)') into linkdomainfull;	
 	end if;
 	select substring(linkdomainfull from  '[^www.].*$') into linkdomain;
@@ -67,3 +67,6 @@ END;
 $$ LANGUAGE plpgsql;
 
 commit;
+
+--bitlylinks
+---update links_divided set link=bitly_result.real_link  from bitly_result where links_divided.link=bitly_result.bitly_link and bitly=true;
